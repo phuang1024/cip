@@ -1,0 +1,2 @@
+# cip
+C++ library installer.
