@@ -60,7 +60,14 @@ class Data:
 
 
 class Handler(BaseHTTPRequestHandler):
-    def _check_run(self):
+    get_funcs = {
+        "/ping": "get_ping",
+    }
+
+    post_funcs = {
+    }
+
+    def check_run(self):
         run = Data.run()
         if not run:
             self.send_response(503)
@@ -69,13 +76,31 @@ class Handler(BaseHTTPRequestHandler):
             self.wfile.write(b"The server is shutting down. Please try again in 5 minutes.")
         return run
 
+    def get_ping(self):
+        self.send_response(200)
+        self.send_header("content-type", "text/plain")
+        self.end_headers()
+        self.wfile.write(b"Ping successful")
+
     def do_GET(self):
-        if not self._check_run():
+        if not self.check_run():
             return
 
+        path = os.path.realpath(self.path)
+        for key in self.get_funcs:
+            if os.path.realpath(key) == path:
+                getattr(self, self.get_funcs[key])()
+                return
+
     def do_POST(self):
-        if not self._check_run():
+        if not self.check_run():
             return
+
+        path = os.path.realpath(self.path)
+        for key in self.post_funcs:
+            if os.path.realpath(key) == path:
+                getattr(self, self.post_funcs[key])()
+                return
 
 
 def main():
