@@ -31,13 +31,13 @@ def secure_hash(data: bytes, hex=False):
     This makes it harder to brute force reverse hashes,
     as each hash will take longer.
 
-    Currently, one CPU core can manage 1000 hashes per second.
+    Currently, one CPU core can manage 10 hashes per second.
     """
-    for _ in range(1000):
+    for _ in range(100000):
         data = sha384(data).digest()
-    for _ in range(1000):
+    for _ in range(100000):
         data = sha256(data).digest()
-    for _ in range(1000):
+    for _ in range(100000):
         data = sha512(data).digest()
     return sha512(data).hexdigest() if hex else sha512(data).digest()
 

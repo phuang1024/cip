@@ -44,15 +44,16 @@ def main():
     popen_args = ["python", os.path.join(PARENT, "server.py"), ip, str(port)]
     while True:
         write("run")
-        proc = subprocess.Popen(popen_args)
         print(f"Starting on IP={ip}, PORT={port}")
+        proc = subprocess.Popen(popen_args)
 
         time.sleep(args.timeout*60)
+        print("Stopping all future requests")
         write("stop")
         time.sleep(300)
 
+        print("Killing server")
         proc.kill()
-        print("Stopping server")
 
 
 main()
