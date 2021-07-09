@@ -19,6 +19,7 @@
 
 import os
 import time
+import shutil
 import subprocess
 import argparse
 
@@ -54,6 +55,11 @@ def main():
 
         print("Killing server")
         proc.kill()
+
+        tmp = os.path.join(PARENT, "data", "tmp")
+        print(f"Removing temporary directory {tmp}")
+        shutil.rmtree(tmp)
+        os.makedirs(tmp)
 
 
 main()
