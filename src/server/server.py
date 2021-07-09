@@ -19,7 +19,47 @@
 
 import sys
 import os
+import json
 from http.server import HTTPServer, BaseHTTPRequestHandler
+
+PARENT = os.path.dirname(os.path.realpath(__file__))
+DATA = os.path.join(PARENT, "data")
+
+
+class Data:
+    @staticmethod
+    def read(path, mode="r"):
+        with open(os.path.join(DATA, path), mode) as file:
+            return file.read()
+
+    @staticmethod
+    def write(path, data, mode="w"):
+        with open(os.path.join(DATA, path), mode) as file:
+            file.write(data)
+
+    @staticmethod
+    def isfile(path):
+        return os.path.isfile(os.path.join(DATA, path))
+
+    @staticmethod
+    def isdir(path):
+        return os.path.isdir(os.path.join(DATA, path))
+
+    @staticmethod
+    def makedirs(path, exist_ok=True):
+        os.makedirs(os.path.join(DATA, path), exist_ok=exist_ok)
+
+    @staticmethod
+    def listdir(path):
+        return os.listdir(os.path.join(DATA, path))
+
+    @staticmethod
+    def load(path):
+        return json.loads(Data.read(path))
+
+    @staticmethod
+    def dump(path, obj):
+        Data.write(path, json.dumps(obj, indent=4))
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -33,6 +73,8 @@ class Handler(BaseHTTPRequestHandler):
 def main():
     ip = sys.argv[1]
     port = int(sys.argv[2])
+
+    Data.makedirs("")
 
     server = HTTPServer((ip, port), Handler)
     server.serve_forever()
