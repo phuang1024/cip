@@ -2,3 +2,4 @@ __pycache__
 .vscode
 
 /src/server/run
+/src/server/data
