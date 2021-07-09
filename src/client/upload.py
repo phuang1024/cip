@@ -18,25 +18,21 @@
 #
 
 import sys
+import os
 import argparse
 from utils import *
 
 
-def account(args, addr):
+def upload(args, addr):
     parser = argparse.ArgumentParser()
-    parser.add_argument("mode", nargs="?", choices=["help", "create"])
+    parser.add_argument("tarball", nargs="?", help="Tarball file path")
     args = parser.parse_args(args)
 
-    if args.mode is None or args.mode == "help":
+    if args.tarball is None:
         parser.print_help(sys.stderr)
+        return
 
-    elif args.mode == "create":
-        uname = input("Username: ")
-        while get(addr, "/account/exists", {"uname": uname}).json()["exists"]:
-            uname = input("Username already exists. Try again: ")
-        while (password:=getpass()) != getpass("Confirm password: "):
-            print("These do not match. Please try again.")
-        email = input("Email (leave blank for none): ")
-
-        r = post(addr, "/account/new", {"uname": uname, "password": password, "email": email})
-        print(r.text)
+    with open(args.tarball, "rb") as file:
+        data = file.read()
+    r = post(addr, "/project/upload", data=data, headers={"ftype": args.tarball})
+    print(r.text)

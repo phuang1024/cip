@@ -17,6 +17,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
+import sys
 import os
 import argparse
 import json
@@ -32,15 +33,19 @@ REQUIRED_FIELDS = (
 
 def build(args, addr):
     parser = argparse.ArgumentParser()
-    parser.add_argument("-s", "--settings", required=True, help="settings.json path")
+    parser.add_argument("settings", nargs="?", help="settings.json path")
     args = parser.parse_args(args)
+
+    if args.settings is None:
+        parser.print_help(sys.stderr)
+        return
 
     if not os.path.isfile(args.settings):
         print(f"No file: {args.settings}")
     else:
         with open(args.settings, "r") as file:
             settings = json.load(file)
-        fname = settings["name"] + "-" + settings["version"]
+        fname = settings["name"] + "-" + settings["version"] + ".tar.gz"
 
         dist = os.path.join(os.getcwd(), "dist")
         os.makedirs(dist, exist_ok=True)

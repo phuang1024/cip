@@ -22,13 +22,14 @@ import argparse
 from utils import *
 from account import account
 from build import build
+from upload import upload
 
 
 def main():
     parser = argparse.ArgumentParser(description="cip client")
     parser.add_argument("-i", "--ip", default="localhost", help="IP address to connect to")
     parser.add_argument("-p", "--port", type=int, default=5555, help="Port to connect to")
-    parser.add_argument("mode", nargs="?", choices=["ping", "install", "uninstall", "account", "build"])
+    parser.add_argument("mode", nargs="?", choices=["ping", "install", "uninstall", "account", "build", "upload"])
     parser.add_argument("options", nargs="*")
     args = parser.parse_args()
 
@@ -36,16 +37,15 @@ def main():
 
     if args.mode is None:
         parser.print_help(sys.stderr)
-
     elif args.mode == "ping":
         r = get(addr, "/ping")
         print(r.text)
-
     elif args.mode == "account":
         account(args.options, addr)
-
     elif args.mode == "build":
         build(args.options, addr)
+    elif args.mode == "upload":
+        upload(args.options, addr)
 
 
 main()
