@@ -19,7 +19,9 @@
 
 import sys
 import os
+import time
 import json
+from datetime import datetime
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 PARENT = os.path.dirname(os.path.realpath(__file__))
@@ -62,9 +64,11 @@ class Data:
 class Handler(BaseHTTPRequestHandler):
     get_funcs = {
         "/ping": "get_ping",
+        "/account/exists": "get_acctexists",
     }
 
     post_funcs = {
+        "/account/new": "post_newacct",
     }
 
     def check_run(self):
@@ -82,6 +86,33 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(b"Ping successful")
 
+    def get_acctexists(self):
+        self.send_response(200)
+        self.send_header("content-type", "text/json")
+        self.end_headers()
+
+        uname = self.headers["uname"]
+        exists = Data.isfile(f"accounts/{uname}.json")
+        self.wfile.write(json.dumps({"exists": exists}).encode())
+
+    def post_newacct(self):
+        uname = self.headers["uname"]
+        password = self.headers["password"]
+        email = self.headers["email"]
+
+        if Data.isfile(f"accounts/{uname}.json"):
+            self.send_response(405)
+            self.send_header("content-type", "text/plain")
+            self.end_headers()
+            self.wfile.write(b"The username already exists.")
+        else:
+            Data.dump(f"accounts/{uname}.json", {"uname": uname, "password": password,
+                "email": email, "create_time": time.time(), "create_date": get_date()})
+            self.send_response(200)
+            self.send_header("content-type", "text/plain")
+            self.end_headers()
+            self.wfile.write(b"Success!")
+
     def do_GET(self):
         if not self.check_run():
             return
@@ -91,6 +122,11 @@ class Handler(BaseHTTPRequestHandler):
             if os.path.realpath(key) == path:
                 getattr(self, self.get_funcs[key])()
                 return
+
+        self.send_response(404)
+        self.send_header("content-type", "text/plain")
+        self.end_headers()
+        self.wfile.write(b"Invalid path.")
 
     def do_POST(self):
         if not self.check_run():
@@ -102,14 +138,23 @@ class Handler(BaseHTTPRequestHandler):
                 getattr(self, self.post_funcs[key])()
                 return
 
+        self.send_response(404)
+        self.send_header("content-type", "text/plain")
+        self.end_headers()
+        self.wfile.write(b"Invalid path.")
+
+
+def get_date():
+    return datetime.now().strftime("%Y-%m-%d %H-%M-%S")
+
 
 def main():
     ip = sys.argv[1]
     port = int(sys.argv[2])
 
     Data.makedirs("")
+    Data.makedirs("accounts")
 
-    print("START")
     server = HTTPServer((ip, port), Handler)
     server.serve_forever()
 
