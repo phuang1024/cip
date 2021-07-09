@@ -32,7 +32,11 @@ def upload(args, addr):
         parser.print_help(sys.stderr)
         return
 
+    uname = os.environ["CIP_UNAME"] if "CIP_UNAME" in os.environ else input("Username: ")
+    password = secure_hash(os.environ["CIP_PASSWORD"].encode()) \
+        if "CIP_PASSWORD" in os.environ else getpass()
+
     with open(args.tarball, "rb") as file:
         data = file.read()
-    r = post(addr, "/project/upload", data=data, headers={"ftype": args.tarball})
+    r = post(addr, "/project/upload", data=data, headers={"ftype": args.tarball, "uname": uname, "password": password})
     print(r.text)

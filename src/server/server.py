@@ -19,16 +19,27 @@
 
 import sys
 import os
+import shutil
 import time
 import json
+import random
 from datetime import datetime
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 PARENT = os.path.dirname(os.path.realpath(__file__))
 DATA = os.path.join(PARENT, "data")
 
+REQUIRED_FIELDS = (
+    "name",
+    "version",
+    "files",
+)
+
 
 class Data:
+    @staticmethod
+    def realpath(path):
+        return os.path.join(DATA, path)
     @staticmethod
     def run():
         with open(os.path.join(PARENT, "run"), "r") as file:
@@ -69,6 +80,7 @@ class Handler(BaseHTTPRequestHandler):
 
     post_funcs = {
         "/account/new": "post_newacct",
+        "/project/upload": "post_upload"
     }
 
     def check_run(self):
@@ -113,6 +125,22 @@ class Handler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(b"Success!")
 
+    def post_upload(self):
+        data = self.rfile.read(int(self.headers["Content-Length"]))
+        ftype = self.headers["ftype"]
+        uname = self.headers["uname"]
+        password = self.headers["password"]
+
+        path = f"tmp/{randstr()}.{ftype}"
+        Data.write(path, data, mode="wb")
+
+        success, msg = process_pkg(path, uname, password)
+
+        self.send_response((201 if success else 405))
+        self.send_header("content-type", "text/plain")
+        self.end_headers()
+        self.wfile.write(msg.encode())
+
     def do_GET(self):
         if not self.check_run():
             return
@@ -144,8 +172,64 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(b"Invalid path.")
 
 
+def process_pkg(path, uname, password):
+    if not Data.isfile(f"accounts/{uname}.json"):
+        return (False, "Account does not exist.")
+
+    data = Data.load(f"accounts/{uname}.json")
+    if data["password"] != password:
+        return (False, "Password is incorrect.")
+
+    try:
+        realpath = Data.realpath(path)
+        output = realpath + "_dir"
+        shutil.unpack_archive(realpath, output)
+    except ValueError:
+        return (False, "Could not unpack archive.")
+
+    if "cip.json" not in os.listdir(output):
+        return (False, "cip.json not found.")
+
+    with open(os.path.join(output, "cip.json"), "r") as file:
+        settings = json.load(file)
+    for field in REQUIRED_FIELDS:
+        if field not in settings:
+            return (False, f"Key {field} required in cip.json, but not found.")
+
+    name = settings["name"]
+    version = settings["version"]
+    if Data.isdir(f"projects/{name}"):
+        if version == "info.json":
+            return (False, "Invalid version name.")
+
+        project_info = Data.load(f"projects/{name}/info.json")
+        if project_info["owner"] != uname:
+            return (False, "The project already exists and is not owned by you.")
+        if version in project_info["versions"]:
+            return (False, "The version already exists.")
+
+    else:
+        Data.makedirs(f"projects/{name}")
+        Data.dump(f"projects/{name}/info.json", {"owner": uname, "versions": {}})
+        project_info = Data.load(f"projects/{name}/info.json")
+
+    project_info["versions"][version] = settings
+    project_info["latest"] = version
+    Data.dump(f"projects/{name}/info.json", project_info)
+
+    release_path = Data.realpath(f"projects/{name}/{version}")
+    os.makedirs(release_path)
+    shutil.unpack_archive(Data.realpath(path), release_path)
+
+    return (True, "Success!")
+
+
 def get_date():
     return datetime.now().strftime("%Y-%m-%d %H-%M-%S")
+
+
+def randstr(k=30):
+    return "".join(random.choices("0123456789abcdef", k=k))
 
 
 def main():
@@ -154,6 +238,8 @@ def main():
 
     Data.makedirs("")
     Data.makedirs("accounts")
+    Data.makedirs("projects")
+    Data.makedirs("tmp")
 
     server = HTTPServer((ip, port), Handler)
     server.serve_forever()

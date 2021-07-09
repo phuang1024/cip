@@ -24,16 +24,10 @@ import json
 import tarfile
 from pathlib import Path
 
-REQUIRED_FIELDS = (
-    "name",
-    "version",
-    "files",
-)
-
 
 def build(args, addr):
     parser = argparse.ArgumentParser()
-    parser.add_argument("settings", nargs="?", help="settings.json path")
+    parser.add_argument("settings", nargs="?", help="cip.json path")
     args = parser.parse_args(args)
 
     if args.settings is None:
