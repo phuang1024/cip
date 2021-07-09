@@ -26,11 +26,6 @@ PARENT = os.path.dirname(os.path.realpath(__file__))
 RUN_FILE = os.path.join(PARENT, "run")
 
 
-def remove():
-    if os.path.isfile(RUN_FILE):
-        os.remove(RUN_FILE)
-
-
 def write(data):
     with open(RUN_FILE, "w") as file:
         file.write(data)
@@ -45,8 +40,6 @@ def main():
 
     ip = args.ip
     port = args.port
-
-    remove()
 
     popen_args = ["python", os.path.join(PARENT, "server.py"), ip, str(port)]
     while True:

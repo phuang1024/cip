@@ -28,46 +28,54 @@ DATA = os.path.join(PARENT, "data")
 
 class Data:
     @staticmethod
+    def run():
+        with open(os.path.join(PARENT, "run"), "r") as file:
+            return file.read().strip() == "run"
+    @staticmethod
     def read(path, mode="r"):
         with open(os.path.join(DATA, path), mode) as file:
             return file.read()
-
     @staticmethod
     def write(path, data, mode="w"):
         with open(os.path.join(DATA, path), mode) as file:
             file.write(data)
-
     @staticmethod
     def isfile(path):
         return os.path.isfile(os.path.join(DATA, path))
-
     @staticmethod
     def isdir(path):
         return os.path.isdir(os.path.join(DATA, path))
-
     @staticmethod
     def makedirs(path, exist_ok=True):
         os.makedirs(os.path.join(DATA, path), exist_ok=exist_ok)
-
     @staticmethod
     def listdir(path):
         return os.listdir(os.path.join(DATA, path))
-
     @staticmethod
     def load(path):
         return json.loads(Data.read(path))
-
     @staticmethod
     def dump(path, obj):
         Data.write(path, json.dumps(obj, indent=4))
 
 
 class Handler(BaseHTTPRequestHandler):
+    def _check_run(self):
+        run = Data.run()
+        if not run:
+            self.send_response(503)
+            self.send_header("content-type", "text/plain")
+            self.end_headers()
+            self.wfile.write(b"The server is shutting down. Please try again in 5 minutes.")
+        return run
+
     def do_GET(self):
-        pass
+        if not self._check_run():
+            return
 
     def do_POST(self):
-        pass
+        if not self._check_run():
+            return
 
 
 def main():
