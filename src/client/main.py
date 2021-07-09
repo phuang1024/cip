@@ -24,7 +24,7 @@ import requests
 
 
 def get(addr, path, data={}, headers={}, raise_status=False):
-    r = requests.get(f"{addr[0]}:{addr[1]}{path}", data=data, headers=headers)
+    r = requests.get(f"http://{addr[0]}:{addr[1]}{path}", data=data, headers=headers)
     if raise_status and r.status_code != 200:
         raise ValueError(f"GET {path} returned response {r.status_code}")
     return r
@@ -32,7 +32,7 @@ def get(addr, path, data={}, headers={}, raise_status=False):
 
 def main():
     parser = argparse.ArgumentParser(description="cip client")
-    parser.add_argument("-i", "--ip", default="127.0.0.1", help="IP address to connect to")
+    parser.add_argument("-i", "--ip", default="localhost", help="IP address to connect to")
     parser.add_argument("-p", "--port", type=int, default=5555, help="Port to connect to")
     parser.add_argument("mode", nargs="?", choices=["ping", "install", "uninstall"])
     args = parser.parse_args()
@@ -44,10 +44,7 @@ def main():
 
     elif args.mode == "ping":
         r = get(addr, "/ping")
-        if r.status_code == 503:
-            print(r.text)
-        else:
-            print("Ping successful.")
+        print(r.text)
 
 
 main()

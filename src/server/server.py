@@ -109,6 +109,7 @@ def main():
 
     Data.makedirs("")
 
+    print("START")
     server = HTTPServer((ip, port), Handler)
     server.serve_forever()
 
