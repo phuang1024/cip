@@ -17,12 +17,38 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
+import os
+import argparse
 import json
 import tarfile
 from pathlib import Path
 
+REQUIRED_FIELDS = (
+    "name",
+    "version",
+    "files",
+)
 
-def build(settings_path, output):
+
+def build(args, addr):
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-s", "--settings", required=True, help="settings.json path")
+    args = parser.parse_args(args)
+
+    if not os.path.isfile(args.settings):
+        print(f"No file: {args.settings}")
+    else:
+        with open(args.settings, "r") as file:
+            settings = json.load(file)
+        fname = settings["name"] + "-" + settings["version"]
+
+        dist = os.path.join(os.getcwd(), "dist")
+        os.makedirs(dist, exist_ok=True)
+
+        make_tar(args.settings, os.path.join(dist, fname))
+
+
+def make_tar(settings_path, output):
     with open(settings_path, "r") as file:
         settings = json.load(file)
 
