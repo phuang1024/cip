@@ -18,30 +18,48 @@
 #
 
 import os
+import time
+import subprocess
 import argparse
-from http.server import HTTPServer, BaseHTTPRequestHandler
+
+PARENT = os.path.dirname(os.path.realpath(__file__))
+RUN_FILE = os.path.join(PARENT, "run")
 
 
-class Handler(BaseHTTPRequestHandler):
-    def do_GET(self):
-        pass
+def remove():
+    if os.path.isfile(RUN_FILE):
+        os.remove(RUN_FILE)
 
-    def do_POST(self):
-        pass
+
+def write(data):
+    with open(RUN_FILE, "w") as file:
+        file.write(data)
 
 
 def main():
     parser = argparse.ArgumentParser(description="cip server")
     parser.add_argument("-i", "--ip", default="0.0.0.0", help="IP address to serve on")
     parser.add_argument("-p", "--port", type=int, default=5555, help="Port to serve on")
+    parser.add_argument("-t", "--timeout", type=float, default=720, help="Minutes between server restart")
     args = parser.parse_args()
 
     ip = args.ip
     port = args.port
 
-    print(f"Serving on IP={ip}, PORT={port}")
-    server = HTTPServer((ip, port), Handler)
-    server.serve_forever()
+    remove()
+
+    popen_args = ["python", os.path.join(PARENT, "server.py"), ip, str(port)]
+    while True:
+        write("run")
+        proc = subprocess.Popen(popen_args)
+        print(f"Starting on IP={ip}, PORT={port}")
+
+        time.sleep(args.timeout*60)
+        write("stop")
+        time.sleep(300)
+
+        proc.kill()
+        print("Stopping server")
 
 
 main()
