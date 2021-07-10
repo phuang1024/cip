@@ -17,10 +17,19 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
+import os
 import random
 import requests
 from getpass import getpass as _getpass
 from hashlib import sha256, sha384, sha512
+
+INCLUDE = os.path.expanduser("~/.cip/include")
+LIB = os.path.expanduser("~/.cip/lib")
+HEADER_EXTS = (".h", ".hpp", ".hxx")
+LIB_EXTS = (".so", ".o", ".a", ".obj")
+
+os.makedirs(os.path.expanduser("~/.cip/include"), exist_ok=True)
+os.makedirs(os.path.expanduser("~/.cip/lib"), exist_ok=True)
 
 
 def randstr(k=30):

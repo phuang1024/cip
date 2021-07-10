@@ -35,9 +35,11 @@ def install(args, addr):
         return
 
     for pkg in args.packages:
+        print(f"Installing {pkg}")
+
         r = get(addr, "/project/download", headers={"project": pkg})
         if r.status_code == 404:
-            print(f"Not found: {pkg}")
+            print(f"  Package not found")
             continue
 
         ext = r.headers["ftype"]
@@ -47,3 +49,16 @@ def install(args, addr):
 
         tmp_dir = tmp_path+"_dir"
         shutil.unpack_archive(tmp_path, tmp_dir)
+
+        for file in os.listdir(tmp_dir):
+            abspath = os.path.join(tmp_dir, file)
+            if os.path.isfile(abspath):
+                print(f"  Found file {file}")
+                if file.endswith(HEADER_EXTS):
+                    print(f"    Copying {file} to include")
+                    os.rename(abspath, os.path.join(INCLUDE, file))
+                elif file.endswith(LIB_EXTS):
+                    print(f"    Copying {file} to lib")
+                    os.rename(abspath, os.path.join(LIB, file))
+                else:
+                    print(f"    Skipping {file}")

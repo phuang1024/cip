@@ -120,7 +120,7 @@ class Handler(BaseHTTPRequestHandler):
             shutil.make_archive(tmp, "xztar", src)
 
             self.send_response(200)
-            self.send_header("content-type", "application/octet-stream")
+            self.send_header("content-type", "text/plain")
             self.send_header("ftype", ".tar.xz")
             with open(tmp+".tar.xz", "rb") as file:
                 self.send_header("data", str(file.read()))
