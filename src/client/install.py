@@ -18,25 +18,32 @@
 #
 
 import sys
+import os
+import shutil
 import argparse
+from ast import literal_eval
 from utils import *
 
 
-def account(args, addr):
+def install(args, addr):
     parser = argparse.ArgumentParser()
-    parser.add_argument("mode", nargs="?", choices=["help", "create"])
+    parser.add_argument("packages", nargs="*", help="Packages to install.")
     args = parser.parse_args(args)
 
-    if args.mode is None or args.mode == "help":
+    if len(args.packages) == 0:
         parser.print_help(sys.stderr)
+        return
 
-    elif args.mode == "create":
-        uname = input("Username: ")
-        while get(addr, "/account/exists", {"uname": uname}).json()["exists"]:
-            uname = input("Username already exists. Try again: ")
-        while (password:=getpass()) != getpass("Confirm password: "):
-            print("These do not match. Please try again.")
-        email = input("Email (leave blank for none): ")
+    for pkg in args.packages:
+        r = get(addr, "/project/download", headers={"project": pkg})
+        if r.status_code == 404:
+            print(f"Not found: {pkg}")
+            continue
 
-        r = post(addr, "/account/new", headers={"uname": uname, "password": password, "email": email})
-        print(r.text)
+        ext = r.headers["ftype"]
+        tmp_path = os.path.join("/tmp", randstr()+ext)
+        with open(tmp_path, "wb") as file:
+            file.write(literal_eval(r.headers["data"]))
+
+        tmp_dir = tmp_path+"_dir"
+        shutil.unpack_archive(tmp_path, tmp_dir)

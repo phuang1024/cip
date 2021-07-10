@@ -17,9 +17,14 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
+import random
 import requests
 from getpass import getpass as _getpass
 from hashlib import sha256, sha384, sha512
+
+
+def randstr(k=30):
+    return "".join(random.choices("0123456789abcdef", k=k))
 
 
 def get(addr, path, headers={}):

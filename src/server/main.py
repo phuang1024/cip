@@ -45,19 +45,19 @@ def main():
     popen_args = ["python", os.path.join(PARENT, "server.py"), ip, str(port)]
     while True:
         write("run")
-        print(f"Starting on IP={ip}, PORT={port}")
+        print(f"Starting on IP={ip}, PORT={port}", flush=True)
         proc = subprocess.Popen(popen_args)
 
         time.sleep(args.timeout*60)
-        print("Stopping all future requests")
+        print("Stopping all future requests", flush=True)
         write("stop")
         time.sleep(300)
 
-        print("Killing server")
+        print("Killing server", flush=True)
         proc.kill()
 
         tmp = os.path.join(PARENT, "data", "tmp")
-        print(f"Removing temporary directory {tmp}")
+        print(f"Removing temporary directory {tmp}", flush=True)
         shutil.rmtree(tmp)
         os.makedirs(tmp)
 

@@ -76,11 +76,12 @@ class Handler(BaseHTTPRequestHandler):
     get_funcs = {
         "/ping": "get_ping",
         "/account/exists": "get_acctexists",
+        "/project/download": "get_download",
     }
 
     post_funcs = {
         "/account/new": "post_newacct",
-        "/project/upload": "post_upload"
+        "/project/upload": "post_upload",
     }
 
     def check_run(self):
@@ -106,6 +107,31 @@ class Handler(BaseHTTPRequestHandler):
         uname = self.headers["uname"]
         exists = Data.isfile(f"accounts/{uname}.json")
         self.wfile.write(json.dumps({"exists": exists}).encode())
+
+    def get_download(self):
+        project = self.headers["project"]
+
+        if Data.isdir(f"projects/{project}"):
+            info = Data.load(f"projects/{project}/info.json")
+            latest = info["latest"]
+
+            src = Data.realpath(f"projects/{project}/{latest}")
+            tmp = Data.realpath(f"tmp/{randstr()}")
+            shutil.make_archive(tmp, "xztar", src)
+
+            self.send_response(200)
+            self.send_header("content-type", "application/octet-stream")
+            self.send_header("ftype", ".tar.xz")
+            with open(tmp+".tar.xz", "rb") as file:
+                self.send_header("data", str(file.read()))
+            self.end_headers()
+            self.wfile.write(b"Success!")
+
+        else:
+            self.send_response(404)
+            self.send_header("content-type", "text/plain")
+            self.end_headers()
+            self.wfile.write(b"Project not found.")
 
     def post_newacct(self):
         uname = self.headers["uname"]
