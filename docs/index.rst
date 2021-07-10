@@ -7,5 +7,5 @@ C++ library installer.
    :maxdepth: 1
    :caption: Contents:
 
-   installation
+   install
    security

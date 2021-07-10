@@ -3,5 +3,9 @@ __pycache__
 
 *.deb
 
+/docs/_build
+/docs/_static
+/docs/_templates
+
 /src/server/run
 /src/server/data
