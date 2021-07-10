@@ -28,7 +28,7 @@ from install import install
 
 def main():
     parser = argparse.ArgumentParser(description="cip client")
-    parser.add_argument("-i", "--ip", default="localhost", help="IP address to connect to")
+    parser.add_argument("-i", "--ip", default="18.144.147.157", help="IP address to connect to")
     parser.add_argument("-p", "--port", type=int, default=5555, help="Port to connect to")
     parser.add_argument("mode", nargs="?", choices=["ping", "install", "uninstall", "account", "build", "upload"])
     parser.add_argument("options", nargs="*")
