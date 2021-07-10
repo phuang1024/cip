@@ -9,3 +9,4 @@ C++ library installer.
 
    install
    security
+   manual
