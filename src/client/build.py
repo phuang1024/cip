@@ -34,6 +34,7 @@ def build(args, addr):
         dist = os.path.join(os.getcwd(), "dist")
         os.makedirs(dist, exist_ok=True)
 
+        print("Writing tar in", fname)
         make_tar("cip.json", os.path.join(dist, fname))
 
 

@@ -25,6 +25,41 @@ from ast import literal_eval
 from utils import *
 
 
+def install_pkg(addr, pkg):
+    print(f"Installing {pkg}")
+
+    r = get(addr, "/project/download", headers={"project": pkg})
+    if r.status_code == 404:
+        print(f"  Package not found")
+        return
+
+    ext = r.headers["ftype"]
+    tmp_path = os.path.join(TMP, "cip_"+randstr()+ext)
+    with open(tmp_path, "wb") as file:
+        file.write(literal_eval(r.headers["data"]))
+
+    tmp_dir = tmp_path+"_dir"
+    shutil.unpack_archive(tmp_path, tmp_dir)
+
+    for file in os.listdir(tmp_dir):
+        abspath = os.path.join(tmp_dir, file)
+        if os.path.isfile(abspath):
+            print(f"  Found file {file}")
+            if file.endswith(HEADER_EXTS):
+                print(f"    Copying {file} to include")
+                os.rename(abspath, os.path.join(INCLUDE, file))
+            elif file.endswith(LIB_EXTS):
+                print(f"    Copying {file} to lib")
+                os.rename(abspath, os.path.join(LIB, file))
+            else:
+                print(f"    Skipping {file}")
+
+    depends = r.headers["depends"]
+    print("  Installing dependencies: "+" ".join(depends))
+    for pkg in depends:
+        install_pkg(addr, pkg)
+
+
 def install(args, addr):
     parser = argparse.ArgumentParser()
     parser.add_argument("packages", nargs="*", help="Packages to install.")
@@ -35,30 +70,4 @@ def install(args, addr):
         return
 
     for pkg in args.packages:
-        print(f"Installing {pkg}")
-
-        r = get(addr, "/project/download", headers={"project": pkg})
-        if r.status_code == 404:
-            print(f"  Package not found")
-            continue
-
-        ext = r.headers["ftype"]
-        tmp_path = os.path.join(TMP, "cip_"+randstr()+ext)
-        with open(tmp_path, "wb") as file:
-            file.write(literal_eval(r.headers["data"]))
-
-        tmp_dir = tmp_path+"_dir"
-        shutil.unpack_archive(tmp_path, tmp_dir)
-
-        for file in os.listdir(tmp_dir):
-            abspath = os.path.join(tmp_dir, file)
-            if os.path.isfile(abspath):
-                print(f"  Found file {file}")
-                if file.endswith(HEADER_EXTS):
-                    print(f"    Copying {file} to include")
-                    os.rename(abspath, os.path.join(INCLUDE, file))
-                elif file.endswith(LIB_EXTS):
-                    print(f"    Copying {file} to lib")
-                    os.rename(abspath, os.path.join(LIB, file))
-                else:
-                    print(f"    Skipping {file}")
+        install_pkg(addr, pkg)
