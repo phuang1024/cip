@@ -52,6 +52,7 @@ def main():
     init()
 
     parser = argparse.ArgumentParser(description="cip client")
+    parser.add_argument("-v", "--version", action="store_true", help="Print version")
     parser.add_argument("-i", "--ip", default="18.144.147.157", help="IP address to connect to")
     parser.add_argument("-p", "--port", type=int, default=5555, help="Port to connect to")
     parser.add_argument("mode", nargs="?", choices=["ping", "install", "uninstall", "account", "build", "upload"])
@@ -59,6 +60,10 @@ def main():
     args = parser.parse_args()
 
     addr = (args.ip, args.port)
+
+    if args.version:
+        print(VERSION)
+        return
 
     if args.mode is None:
         parser.print_help(sys.stderr)
