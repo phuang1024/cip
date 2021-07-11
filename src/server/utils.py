@@ -34,4 +34,5 @@ REQUIRED_FIELDS = (
     "name",
     "version",
     "files",
+    "dependencies",
 )
