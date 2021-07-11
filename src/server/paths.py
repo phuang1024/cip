@@ -17,6 +17,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
+import os
 import time
 import shutil
 import json
@@ -137,7 +138,7 @@ def post_newacct(self):
 
 def post_upload(self):
     data = self.rfile.read(int(self.headers["Content-Length"]))
-    ftype = self.headers["ftype"]
+    ftype = os.path.basename(self.headers["ftype"])
     uname = self.headers["uname"]
     password = self.headers["password"]
 

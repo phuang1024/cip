@@ -17,34 +17,24 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-import sys
 import os
-import argparse
 import json
 import tarfile
 from pathlib import Path
 
 
 def build(args, addr):
-    parser = argparse.ArgumentParser()
-    parser.add_argument("settings", nargs="?", help="cip.json path")
-    args = parser.parse_args(args)
-
-    if args.settings is None:
-        parser.print_help(sys.stderr)
-        return
-
-    if not os.path.isfile(args.settings):
-        print(f"No file: {args.settings}")
+    if not os.path.isfile("cip.json"):
+        print(f"cip.json not found.")
     else:
-        with open(args.settings, "r") as file:
+        with open("cip.json", "r") as file:
             settings = json.load(file)
         fname = settings["name"] + "-" + settings["version"] + ".tar.gz"
 
         dist = os.path.join(os.getcwd(), "dist")
         os.makedirs(dist, exist_ok=True)
 
-        make_tar(args.settings, os.path.join(dist, fname))
+        make_tar("cip.json", os.path.join(dist, fname))
 
 
 def make_tar(settings_path, output):
