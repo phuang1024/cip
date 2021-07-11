@@ -54,10 +54,11 @@ def install_pkg(addr, pkg):
             else:
                 print(f"    Skipping {file}")
 
-    depends = r.headers["depends"]
-    print("  Installing dependencies: "+" ".join(depends))
-    for pkg in depends:
-        install_pkg(addr, pkg)
+    depends = literal_eval(r.headers["depends"])
+    if len(depends) > 0:
+        print("  Installing dependencies: "+" ".join(depends))
+        for pkg in depends:
+            install_pkg(addr, pkg)
 
 
 def install(args, addr):

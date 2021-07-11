@@ -107,7 +107,7 @@ def get_download(self):
         self.send_response(200)
         self.send_header("content-type", "text/plain")
         self.send_header("ftype", ".tar.xz")
-        self.send_header("dependencies", str(latest_info["dependencies"]))
+        self.send_header("depends", str(latest_info["dependencies"]))
         with open(tmp+".tar.xz", "rb") as file:
             self.send_header("data", str(file.read()))
         self.end_headers()
