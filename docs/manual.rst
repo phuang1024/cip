@@ -30,3 +30,16 @@ Next, install your package of choice:
 
 The ``wave`` package is used in this example. It parses wave
 audio files.
+
+Cip will add the package files to ``~/.cip/include`` for header
+files, and ``~/.cip/lib`` for shared libraries.
+
+Make sure you add these paths to your C++ include path, so the
+compiler and editor can detect them.
+
+.. code-block:: bash
+
+    # Add these to the end of your .bashrc file.
+
+    export CPATH=$CPATH:~/.cip/include
+    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/.cip/lib
