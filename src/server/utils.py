@@ -19,6 +19,7 @@
 
 import os
 import random
+import string
 from datetime import datetime
 
 def get_date():
@@ -27,6 +28,7 @@ def get_date():
 def randstr(k=30):
     return "".join(random.choices("0123456789abcdef", k=k))
 
+VERSION = "0.0.3"
 PARENT = os.path.dirname(os.path.realpath(__file__))
 DATA = os.path.join(PARENT, "data")
 
@@ -36,3 +38,4 @@ REQUIRED_FIELDS = (
     "files",
     "dependencies",
 )
+NAME_CHARS = string.ascii_letters+string.digits

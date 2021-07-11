@@ -28,6 +28,7 @@ from data import Data
 class Handler(BaseHTTPRequestHandler):
     get_funcs = {
         "/ping": "get_ping",
+        "/version": "get_version",
         "/account/exists": "get_acctexists",
         "/project/download": "get_download",
     }

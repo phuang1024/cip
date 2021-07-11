@@ -22,6 +22,7 @@ import os
 import shutil
 import argparse
 import json
+import requests
 from utils import *
 from account import account
 from build import build
@@ -36,6 +37,20 @@ def init():
     if not os.path.isfile(INFO):
         with open(INFO, "w") as file:
             json.dump({}, file, indent=4)
+
+
+def check_version(addr):
+    try:
+        r = get(addr, "/version", headers={"version": VERSION})
+    except requests.exceptions.ConnectionError:
+        return
+
+    if r.headers["version"] != VERSION:
+        sys.stdout.write(YELLOW)
+        print("WARNING: server-client version mismatch. May cause problems.")
+        print("Client:", VERSION)
+        print("Server:", r.headers["version"])
+        sys.stdout.write(RESET)
 
 
 def rm_tmp():
@@ -60,6 +75,7 @@ def main():
     args = parser.parse_args()
 
     addr = (args.ip, args.port)
+    check_version(addr)
 
     if args.version:
         print(VERSION)

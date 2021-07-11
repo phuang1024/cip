@@ -83,6 +83,13 @@ def get_ping(self):
     self.end_headers()
     self.wfile.write(b"Ping successful")
 
+def get_version(self):
+    self.send_response(200)
+    self.send_header("content-type", "text/plain")
+    self.send_header("version", VERSION)
+    self.end_headers()
+    self.wfile.write(VERSION.encode())
+
 def get_acctexists(self):
     self.send_response(200)
     self.send_header("content-type", "text/json")

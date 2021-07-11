@@ -23,7 +23,7 @@ import requests
 from getpass import getpass as _getpass
 from hashlib import sha256, sha384, sha512
 
-VERSION = "0.0.2"
+VERSION = "0.0.3"
 
 INCLUDE = os.path.expanduser("~/.cip/include")
 LIB = os.path.expanduser("~/.cip/lib")
