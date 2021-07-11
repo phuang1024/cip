@@ -50,7 +50,9 @@ def check_version(addr):
         print("WARNING: server-client version mismatch. May cause problems.")
         print("Client:", VERSION)
         print("Server:", r.headers["version"])
+        print()
         sys.stdout.write(RESET)
+        sys.stderr.write(RESET)
 
 
 def rm_tmp():
