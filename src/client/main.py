@@ -26,7 +26,7 @@ from utils import *
 from account import account
 from build import build
 from upload import upload
-from install import install
+from install import install, uninstall
 
 
 def init():
@@ -72,6 +72,8 @@ def main():
         print(r.text)
     elif args.mode == "install":
         install(args.options, addr)
+    elif args.mode == "uninstall":
+        uninstall(args.options, addr)
     elif args.mode == "account":
         account(args.options, addr)
     elif args.mode == "build":

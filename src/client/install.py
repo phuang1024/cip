@@ -29,7 +29,7 @@ from utils import *
 def install_pkg(addr, pkg):
     with open(INFO, "r") as file:
         info = json.load(file)
-    installed_files = {f for key in info for f in info[key] if info[key][f]}
+    installed_files = {f for key in info for f in info[key]["files"] if info[key]["files"][f]}
 
     print(f"Installing {pkg}")
 
@@ -46,6 +46,7 @@ def install_pkg(addr, pkg):
 
     ext = r.headers["ftype"]
     tmp_path = os.path.join(TMP, "cip_"+randstr()+ext)
+    depends = literal_eval(r.headers["depends"])
     with open(tmp_path, "wb") as file:
         file.write(literal_eval(r.headers["data"]))
 
@@ -78,15 +79,50 @@ def install_pkg(addr, pkg):
 
             pkg_files.append((file, valid))
 
-    info[pkg] = {f: i for f, i in pkg_files}
+    info[pkg] = {
+        "files": {f: i for f, i in pkg_files},
+        "depends": depends,
+    }
     with open(INFO, "w") as file:
         json.dump(info, file, indent=4)
 
-    depends = literal_eval(r.headers["depends"])
     if len(depends) > 0:
         print("  Installing dependencies: "+" ".join(depends))
         for pkg in depends:
             install_pkg(addr, pkg)
+
+
+def uninstall_pkg(addr, pkg):
+    with open(INFO, "r") as file:
+        info = json.load(file)
+
+    print(f"Uninstalling {pkg}")
+    dependents = [p for p in info if pkg in info[p]["depends"] and p != pkg]
+
+    if len(dependents) > 0:
+        sys.stdout.write(YELLOW)
+        print(f"  These packages depend on {pkg}: "+" ".join(dependents))
+        print(f"  Uninstalling {pkg} may cause them to lose functionality.")
+        if input("  Proceed with uninstallation? [y/N] ").lower().strip() != "y":
+            return
+
+    files = [f for f in info[pkg]["files"] if info[pkg]["files"][f]]
+    print(f"  Uninstalling {pkg} will remove:")
+    for f in files:
+        print(f"    {f}")
+    if input("  Uninstall? [y/N] ").lower().strip() != "y":
+            return
+
+    for f in files:
+        print(f"  Removing {f}")
+        if f.endswith(HEADER_EXTS):
+            os.remove(os.path.join(INCLUDE, f))
+        elif f.endswith(LIB_EXTS):
+            os.remove(os.path.join(LIB, f))
+
+    info.pop(pkg, None)
+    with open(INFO, "w") as file:
+        json.dump(info, file)
 
 
 def install(args, addr):
@@ -100,3 +136,16 @@ def install(args, addr):
 
     for pkg in args.packages:
         install_pkg(addr, pkg)
+
+
+def uninstall(args, addr):
+    parser = argparse.ArgumentParser()
+    parser.add_argument("packages", nargs="*", help="Packages to install.")
+    args = parser.parse_args(args)
+
+    if len(args.packages) == 0:
+        parser.print_help(sys.stderr)
+        return
+
+    for pkg in args.packages:
+        uninstall_pkg(addr, pkg)
