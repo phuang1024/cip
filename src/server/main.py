@@ -34,7 +34,7 @@ def write(data):
 
 def main():
     parser = argparse.ArgumentParser(description="cip server")
-    parser.add_argument("-i", "--ip", default="", help="IP address to serve on")
+    parser.add_argument("-i", "--ip", default="0.0.0.0", help="IP address to serve on")
     parser.add_argument("-p", "--port", type=int, default=5555, help="Port to serve on")
     parser.add_argument("-t", "--timeout", type=float, default=720, help="Minutes between server restart")
     args = parser.parse_args()
