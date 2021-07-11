@@ -20,13 +20,24 @@
 import sys
 import os
 import shutil
+import json
 import argparse
 from ast import literal_eval
 from utils import *
 
 
 def install_pkg(addr, pkg):
+    with open(INFO, "r") as file:
+        info = json.load(file)
+    installed_files = {f for key in info for f in info[key] if info[key][f]}
+
     print(f"Installing {pkg}")
+
+    if pkg in info:
+        sys.stdout.write(YELLOW)
+        print(f"  Skipping {pkg} (already installed)")
+        sys.stdout.write(RESET)
+        return
 
     r = get(addr, "/project/download", headers={"project": pkg})
     if r.status_code == 404:
@@ -41,18 +52,35 @@ def install_pkg(addr, pkg):
     tmp_dir = tmp_path+"_dir"
     shutil.unpack_archive(tmp_path, tmp_dir)
 
+    pkg_files = []
     for file in os.listdir(tmp_dir):
         abspath = os.path.join(tmp_dir, file)
         if os.path.isfile(abspath):
             print(f"  Found file {file}")
-            if file.endswith(HEADER_EXTS):
+
+            valid = True
+            if file in installed_files:
+                valid = False
+                sys.stdout.write(YELLOW)
+                print(f"    Skipping {file} (file already exists from another package)")
+                sys.stdout.write(RESET)
+            elif file.endswith(HEADER_EXTS):
                 print(f"    Copying {file} to include")
                 os.rename(abspath, os.path.join(INCLUDE, file))
             elif file.endswith(LIB_EXTS):
                 print(f"    Copying {file} to lib")
                 os.rename(abspath, os.path.join(LIB, file))
             else:
-                print(f"    Skipping {file}")
+                valid = False
+                sys.stdout.write(YELLOW)
+                print(f"    Skipping {file} (invalid extension)")
+                sys.stdout.write(RESET)
+
+            pkg_files.append((file, valid))
+
+    info[pkg] = {f: i for f, i in pkg_files}
+    with open(INFO, "w") as file:
+        json.dump(info, file, indent=4)
 
     depends = literal_eval(r.headers["depends"])
     if len(depends) > 0:

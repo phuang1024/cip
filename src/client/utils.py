@@ -25,12 +25,21 @@ from hashlib import sha256, sha384, sha512
 
 INCLUDE = os.path.expanduser("~/.cip/include")
 LIB = os.path.expanduser("~/.cip/lib")
-HEADER_EXTS = (".h", ".hpp", ".hxx")
-LIB_EXTS = (".so", ".o", ".a", ".obj")
+INFO = os.path.expanduser("~/.cip/info.json")
 TMP = "/tmp"
 
-os.makedirs(os.path.expanduser("~/.cip/include"), exist_ok=True)
-os.makedirs(os.path.expanduser("~/.cip/lib"), exist_ok=True)
+HEADER_EXTS = (".h", ".hpp", ".hxx")
+LIB_EXTS = (".so", ".o", ".a", ".obj")
+
+BLACK = "\x1b[30m"
+BLUE = "\x1b[34m"
+CYAN = "\x1b[36m"
+GREEN = "\x1b[32m"
+MAGENTA = "\x1b[35m"
+RED = "\x1b[31m"
+RESET = "\x1b[39m"
+WHITE = "\x1b[37m"
+YELLOW = "\x1b[33m"
 
 
 def randstr(k=30):

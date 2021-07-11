@@ -21,6 +21,7 @@ import sys
 import os
 import shutil
 import argparse
+import json
 from utils import *
 from account import account
 from build import build
@@ -28,7 +29,16 @@ from upload import upload
 from install import install
 
 
-def rm_cache():
+def init():
+    os.makedirs(os.path.expanduser("~/.cip/include"), exist_ok=True)
+    os.makedirs(os.path.expanduser("~/.cip/lib"), exist_ok=True)
+
+    if not os.path.isfile(INFO):
+        with open(INFO, "w") as file:
+            json.dump({}, file, indent=4)
+
+
+def rm_tmp():
     for file in os.listdir(TMP):
         abspath = os.path.join(TMP, file)
         if file.startswith("cip_"):
@@ -39,6 +49,8 @@ def rm_cache():
 
 
 def main():
+    init()
+
     parser = argparse.ArgumentParser(description="cip client")
     parser.add_argument("-i", "--ip", default="18.144.147.157", help="IP address to connect to")
     parser.add_argument("-p", "--port", type=int, default=5555, help="Port to connect to")
@@ -62,7 +74,7 @@ def main():
     elif args.mode == "upload":
         upload(args.options, addr)
 
-    rm_cache()
+    rm_tmp()
 
 
 main()
