@@ -21,7 +21,7 @@ import os
 import shutil
 import subprocess
 
-VERSION = "0.0-2"
+VERSION = "0.0-3"
 PKG_NAME = f"cip_{VERSION}"
 META = {
     "Package":      "cip",
