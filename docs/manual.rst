@@ -43,3 +43,43 @@ compiler and editor can detect them.
 
     export CPATH=$CPATH:~/.cip/include
     export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/.cip/lib
+
+For instructions on including installed packages in your projects,
+read the "Packaging in C++" section.
+
+Uploading Packages
+------------------
+
+To upload a package, you need an account. Run ``cip account create``
+and follow the console instructions to create an account.
+
+Next, create a file called ``cip.json`` and enter the following information:
+
+.. code-block:: json
+
+    {
+        "name": "package-name",
+        "description": "An example package."
+        "author": "You",
+        "version": "0.0.1",
+        "files": [
+            "*.so",
+            "*.hpp"
+        ],
+        "dependencies": [
+        ]
+    }
+
+Run ``cip build`` to create a tarball file of your package.
+The tarball will be found in ``dist/package_0.0.1.tar.gz``
+File names vary.
+
+Next, upload the tarball file:
+
+``cip upload dist/package_0.0.1.tar.gz``
+
+You will be prompted for your username and password. If the upload
+is successful, you will see a success message. Otherwise, the error
+will be shown.
+
+You can install your package with ``cip install package``
