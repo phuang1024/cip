@@ -43,7 +43,7 @@ def install(args, addr):
             continue
 
         ext = r.headers["ftype"]
-        tmp_path = os.path.join("/tmp", randstr()+ext)
+        tmp_path = os.path.join(TMP, "cip_"+randstr()+ext)
         with open(tmp_path, "wb") as file:
             file.write(literal_eval(r.headers["data"]))
 

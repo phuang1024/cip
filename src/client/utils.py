@@ -27,6 +27,7 @@ INCLUDE = os.path.expanduser("~/.cip/include")
 LIB = os.path.expanduser("~/.cip/lib")
 HEADER_EXTS = (".h", ".hpp", ".hxx")
 LIB_EXTS = (".so", ".o", ".a", ".obj")
+TMP = "/tmp"
 
 os.makedirs(os.path.expanduser("~/.cip/include"), exist_ok=True)
 os.makedirs(os.path.expanduser("~/.cip/lib"), exist_ok=True)

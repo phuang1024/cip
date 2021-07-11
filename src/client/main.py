@@ -18,12 +18,24 @@
 #
 
 import sys
+import os
+import shutil
 import argparse
 from utils import *
 from account import account
 from build import build
 from upload import upload
 from install import install
+
+
+def rm_cache():
+    for file in os.listdir(TMP):
+        abspath = os.path.join(TMP, file)
+        if file.startswith("cip_"):
+            if os.path.isfile(abspath):
+                os.remove(abspath)
+            elif os.path.isdir(abspath):
+                shutil.rmtree(abspath)
 
 
 def main():
@@ -49,6 +61,8 @@ def main():
         build(args.options, addr)
     elif args.mode == "upload":
         upload(args.options, addr)
+
+    rm_cache()
 
 
 main()
